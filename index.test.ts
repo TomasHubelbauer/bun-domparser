@@ -1,43 +1,43 @@
 import { test, expect } from 'bun:test';
-
-// TODO: Introduce `*Test` types which do not have the circular references as
-// base types for the actually exposed types
 import DOMParser from './index';
 
-test('one element', async () => {
+test('HTML', async () => {
   const domParser = new DOMParser();
-  const document = await domParser.parseFromString('<body></body>', 'text/html');
-  expect(document).toEqual({
-    body: {
-      tagName: 'body',
-      children: [],
-    }
-  });
+  const document = await domParser.parseFromString('<html></html>');
+  expect(document.body.outerHTML).toEqual(`<body></body>`);
 });
 
-test('two elements', async () => {
+test('HEAD', async () => {
   const domParser = new DOMParser();
-  const document = await domParser.parseFromString('<head></head><body></body>', 'text/html');
-  expect(document).toEqual({
-    body: {
-      tagName: 'body',
-      children: [],
-    }
-  });
+  const document = await domParser.parseFromString('<head></head>');
+  expect(document.head.outerHTML).toEqual(`<head></head>`);
+  expect(document.body.outerHTML).toEqual(`<body></body>`);
 });
 
-test('normal element', async () => {
+test('BODY', async () => {
   const domParser = new DOMParser();
-  const document = await domParser.parseFromString('<body><a></a></body>', 'text/html');
-  expect(document).toEqual({
-    body: {
-      tagName: 'body',
-      children: [
-        {
-          tagName: 'a',
-          children: [],
-        }
-      ],
-    }
-  });
+  const document = await domParser.parseFromString('<body></body>');
+  expect(document.head.outerHTML).toEqual(`<head></head>`);
+  expect(document.body.outerHTML).toEqual(`<body></body>`);
 });
+
+test('HEAD & BODY', async () => {
+  const domParser = new DOMParser();
+  const document = await domParser.parseFromString('<head></head><body></body>');
+  expect(document.head.outerHTML).toEqual(`<head></head>`);
+  expect(document.body.outerHTML).toEqual(`<body></body>`);
+});
+
+test('H1', async () => {
+  const domParser = new DOMParser();
+  const document = await domParser.parseFromString('<h1></h1>');
+  expect(document.body.outerHTML).toEqual(`<body><h1></h1></body>`);
+});
+
+test('H1 & H2 & H3', async () => {
+  const domParser = new DOMParser();
+  const document = await domParser.parseFromString('<h1></h1><h2></h2><h3></h3>');
+  expect(document.body.outerHTML).toEqual(`<body><h1></h1><h2></h2><h3></h3></body>`);
+});
+
+// TODO: Use http://info.cern.ch/hypertext/WWW/TheProject.html as one of the tests
