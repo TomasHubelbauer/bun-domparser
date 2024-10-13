@@ -72,12 +72,12 @@ class Text implements Node {
   parentElement: Element;
 }
 
-// TODO: See if we can use some API from `HTMLRewriter` to not have to keep this
+// Note that the `HTMLRewriter` tag names are always lowercase despite source HTML
 const autoClosingTags: { [tag: string]: string[] } = {
-  'DD': ['DT'],
-  'DT': ['DD'],
-  'P': ['DD', 'P'],
-  'DL': ['P'],
+  'dd': ['dt'],
+  'dt': ['dd'],
+  'p': ['dd', 'p'],
+  'dl': ['p'],
 };
 
 /**
@@ -143,14 +143,23 @@ export default class DOMParser {
               document.activeElement = document.body;
             }
 
+            // Handle an unclosed element being followed by an opening tag for another element
+            if (autoClosingTags[element.tagName]?.includes(document.activeElement.tagName)) {
+              document.activeElement = document.activeElement.parentElement;
+            }
+
             const activeElement = document.createElement(element.tagName);
             document.activeElement.append(activeElement);
             document.activeElement = activeElement;
 
             element.onEndTag((tag) => {
+              // Handle an unclosed element being followed by a closing tag for another element
               // Keep closing the element chain as void elements until we find the matching tag
               while (document.activeElement?.parentElement && tag.name !== document.activeElement.tagName) {
-                document.activeElement.isVoid = true;
+                // Mark as void only if there are no children, otherwise it is a
+                // case of an element with no closing tag closed by another
+                // element's opening tag via `autoClosingTags`
+                document.activeElement.isVoid = document.activeElement.children.length === 0;
                 document.activeElement = document.activeElement.parentElement;
               }
 

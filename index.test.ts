@@ -47,4 +47,11 @@ test('NEXTID', async () => {
   expect(document.body.outerHTML).toEqual(`<body><header><title></title><nextid /></header></body>`);
 });
 
+// See http://info.cern.ch/hypertext/WWW/TheProject.html
+test('DL & DT & DD', async () => {
+  const domParser = new DOMParser();
+  const document = await domParser.parseFromString(`<DL><DT><A></A><DD><A></A><A></A><DT><A></A><DD><A></A></DL>`);
+  expect(document.body.outerHTML).toEqual(`<body><dl><dt><a></a></dt><dd><a></a><a></a></dd><dt><a></a></dt><dd><a></a></dd></dl></body>`);
+});
+
 // TODO: Use full http://info.cern.ch/hypertext/WWW/TheProject.html as one of the tests
