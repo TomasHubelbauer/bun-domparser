@@ -35,11 +35,22 @@ class Element implements Node {
   // Note that this information is not exposed in the `Element` web interface
   isVoid: boolean;
 
-  append(element: Element) {
-    this.children.push(element);
-    element.parentNode = this;
-    element.parentElement = this;
-    element.ownerDocument = this.ownerDocument;
+  prepend(...elements: Element[]) {
+    this.children.unshift(...elements);
+    for (const element of elements) {
+      element.parentNode = this;
+      element.parentElement = this;
+      element.ownerDocument = this.ownerDocument;
+    }
+  }
+
+  append(...elements: Element[]) {
+    this.children.push(...elements);
+    for (const element of elements) {
+      element.parentNode = this;
+      element.parentElement = this;
+      element.ownerDocument = this.ownerDocument;
+    }
   }
 
   get outerHTML() {
