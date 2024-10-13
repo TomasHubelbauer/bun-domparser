@@ -168,16 +168,14 @@ export default class DOMParser {
 
             element.onEndTag((tag) => {
               // Handle an unclosed element being followed by a closing tag for another element
-              // Keep closing the element chain as void elements until we find the matching tag
-              while (document.activeElement?.parentElement && tag.name !== document.activeElement.tagName) {
+              if (document.activeElement?.parentElement && tag.name !== document.activeElement.tagName) {
                 // Mark as void only if there are no children, otherwise it is a
                 // case of an element with no closing tag closed by another
                 // element's opening tag via `autoClosingTags`
                 document.activeElement.isVoid = document.activeElement.children.length === 0;
-                document.activeElement = document.activeElement.parentElement;
               }
 
-              document.activeElement = document.activeElement.parentElement;
+              document.activeElement = document.activeElement?.parentElement;
             });
           },
           comments(comment) {
