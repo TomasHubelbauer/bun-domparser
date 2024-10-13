@@ -131,24 +131,24 @@ export default class DOMParser {
               return;
             }
 
+            let skipCreation = false;
+
             if (element.tagName === 'HEAD' || element.tagName === 'head') {
-              if (document.head) {
-                reject(new Error('Only one HEAD element is allowed'));
+              if (!document.head) {
+                document.head = document.createElement('head');
+                document.activeElement = document.head;
               }
 
-              document.head = document.createElement('head');
-              document.activeElement = document.head;
-              return;
+              skipCreation = true;
             }
 
             if (element.tagName === 'BODY' || element.tagName === 'body') {
-              if (document.body) {
-                reject(new Error('Only one BODY element is allowed'));
+              if (!document.body) {
+                document.body = document.createElement('body');
+                document.activeElement = document.body;
               }
 
-              document.body = document.createElement('body');
-              document.activeElement = document.body;
-              return;
+              skipCreation = true;
             }
 
             // Create a `body` in case the top-level element came before `body`
@@ -162,9 +162,11 @@ export default class DOMParser {
               document.activeElement = document.activeElement.parentElement;
             }
 
-            const activeElement = document.createElement(element.tagName);
-            document.activeElement.append(activeElement);
-            document.activeElement = activeElement;
+            if (!skipCreation) {
+              const activeElement = document.createElement(element.tagName);
+              document.activeElement.append(activeElement);
+              document.activeElement = activeElement;
+            }
 
             element.onEndTag((tag) => {
               // Handle an unclosed element being followed by a closing tag for another element
