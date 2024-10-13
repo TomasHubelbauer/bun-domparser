@@ -105,13 +105,16 @@ export default class DOMParser {
 
     return new Promise<Document>((resolve, reject) => {
       const document = new Document();
+
+      // Beware of `HTMLRewriter` silently swallowing errors!
+      // See https://github.com/oven-sh/bun/issues/6124
       new HTMLRewriter()
         .on('*', {
           element(element) {
             // TODO: Carry over the HTML element attributes
             if (element.tagName === 'HTML' || element.tagName === 'html') {
               if (document.activeElement) {
-                throw new Error('Only one HTML element is allowed');
+                reject(new Error('Only one HTML element is allowed'));
               }
 
               return;
@@ -119,7 +122,7 @@ export default class DOMParser {
 
             if (element.tagName === 'HEAD' || element.tagName === 'head') {
               if (document.head) {
-                throw new Error('Only one HEAD element is allowed');
+                reject(new Error('Only one HEAD element is allowed'));
               }
 
               document.head = document.createElement('head');
@@ -129,7 +132,7 @@ export default class DOMParser {
 
             if (element.tagName === 'BODY' || element.tagName === 'body') {
               if (document.body) {
-                throw new Error('Only one BODY element is allowed');
+                reject(new Error('Only one BODY element is allowed'));
               }
 
               document.body = document.createElement('body');
