@@ -40,4 +40,11 @@ test('H1 & H2 & H3', async () => {
   expect(document.body.outerHTML).toEqual(`<body><h1></h1><h2></h2><h3></h3></body>`);
 });
 
-// TODO: Use http://info.cern.ch/hypertext/WWW/TheProject.html as one of the tests
+// See http://info.cern.ch/hypertext/WWW/TheProject.html
+test('NEXTID', async () => {
+  const domParser = new DOMParser();
+  const document = await domParser.parseFromString(`<HEADER><TITLE></TITLE><NEXTID></HEADER>`);
+  expect(document.body.outerHTML).toEqual(`<body><header><title></title><nextid /></header></body>`);
+});
+
+// TODO: Use full http://info.cern.ch/hypertext/WWW/TheProject.html as one of the tests

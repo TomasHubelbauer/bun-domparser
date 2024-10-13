@@ -31,6 +31,10 @@ class Element implements Node {
   parentNode: Node;
   parentElement: Element;
 
+  // TODO: Consider keeping a list of maybe just allowing any element to be void
+  // Note that this information is not exposed in the `Element` web interface
+  isVoid: boolean;
+
   append(element: Element) {
     this.children.push(element);
     element.parentNode = this;
@@ -39,7 +43,18 @@ class Element implements Node {
   }
 
   get outerHTML() {
-    let html = `<${this.tagName}>`;
+    let html = `<${this.tagName}`;
+    if (this.isVoid) {
+      // TODO: Replace with `this.childNodes.length > 0` once `childNodes` exist
+      if (this.children.length > 0) {
+        throw new Error('Void elements cannot have children');
+      }
+
+      html += ` />`;
+      return html;
+    }
+
+    html += `>`;
     for (const child of this.children) {
       html += child.outerHTML;
     }
@@ -132,7 +147,13 @@ export default class DOMParser {
             document.activeElement.append(activeElement);
             document.activeElement = activeElement;
 
-            element.onEndTag(() => {
+            element.onEndTag((tag) => {
+              // Keep closing the element chain as void elements until we find the matching tag
+              while (document.activeElement?.parentElement && tag.name !== document.activeElement.tagName) {
+                document.activeElement.isVoid = true;
+                document.activeElement = document.activeElement.parentElement;
+              }
+
               document.activeElement = document.activeElement.parentElement;
             });
           },
